@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-runner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea-runner
+  template:
+    metadata:
+      labels:
+        app: gitea-runner
+    spec:
+      containers:
+      - name: runner
+        image: gitea/act_runner:latest
+        securityContext:       # <--- AJOUTE CE BLOC
+          privileged: true     # <--- TRÈS IMPORTANT
+        env:
+        - name: GITEA_INSTANCE_URL
+          value: "http://10.40.10.112:3000"
+        - name: GITEA_RUNNER_REGISTRATION_TOKEN
+          value: "bdYA95VHiCxLzdSaTHky37dtuEqbXVuRrPINVbI6" # <--- METS LE TOKEN TOUT NEUF
+        - name: GITEA_RUNNER_NAME
+          value: "nw-runner-final"
+        - name: GITEA_RUNNER_LABELS
+          value: "ubuntu-latest,debian-latest"
+        volumeMounts:
+        - name: docker-sock
+          mountPath: /var/run/docker.sock
+      volumes:
+      - name: docker-sock
+        hostPath:
+          path: /var/run/docker.sock
